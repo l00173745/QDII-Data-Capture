@@ -4,7 +4,7 @@ import pandas as pd
 
 class DB_mysql():
     def __init__(self):
-        self.conn = pymysql.connect(host="10.222.47.71", user="MYSQLSupp",password="Duanka_0904",database="mysqldb",charset="utf8")
+        self.conn = pymysql.connect(host="10.222.48.24", user="MYSQLSupp",password="Duanka_0904",database="world",charset="utf8")
         pass
 
     def query(self,sql_str,**kwargs):
@@ -26,10 +26,38 @@ class DB_mysql():
         self.conn.close()
         return df
 
-
+    def insert(self,tbl_nme,data):
+        """
+        :param tbl_nme: target table
+        :param data: dictionry which key for columns and value for values
+        :return:
+        """
+        cur = self.conn.cursor()
+        keys = ', '.join(data.keys())
+        values = ', '.join(['%s'] * len(data))
+        sql = 'INSERT INTO {table}({keys}) VALUES ({values})'.format(table=tbl_nme, keys=keys, values=values)
+        try:
+            cur.execute(sql, tuple(data.values()))
+            print('Successful')
+            self.conn.commit()
+        except:
+            print('Failed')
+            self.conn.rollback()
+        finally:
+            self.conn.close()
 
 if __name__=='__main__':
     mysql=DB_mysql()
-    sql_str='select * from INDEX_CAPTURE_INFO'
+    sql_str='select * from city'
     df = mysql.query(sql_str)
+    mysql = DB_mysql()
+    tbl_nme = 'world.city'
+    data ={
+        'ID':5001,
+        'NAME':'TonyCity',
+        'COUNTRYCODE':'AFG',
+        'DISTRICT':'Herat',
+        'POPULATION':190000
+    }
+    mysql.insert(tbl_nme,data)
     pass
